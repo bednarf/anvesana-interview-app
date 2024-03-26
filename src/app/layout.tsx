@@ -1,14 +1,22 @@
-import type { Metadata } from 'next'
+'use client'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ReactNode } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata: Metadata = {
-    title: 'Invesana Interview App',
-    description: `Frank's search app for the Invesana interview`,
-}
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            refetchOnWindowFocus: false,
+            refetchOnMount: false,
+            refetchOnReconnect: false,
+            retry: false,
+            staleTime: 1000 * 60 * 60 * 24,
+        },
+    },
+})
 
 export default function RootLayout({
     children,
@@ -22,7 +30,9 @@ export default function RootLayout({
                 <link rel="preconnect" href="https://fonts.gstatic.com" />
                 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
             </head>
-            <body className={inter.className}>{children}</body>
+            <QueryClientProvider client={queryClient}>
+                <body className={inter.className}>{children}</body>
+            </QueryClientProvider>
         </html>
     )
 }

@@ -1,78 +1,84 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client'
+import { Autocomplete, Box, Button, Container, TextField } from '@mui/material'
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import axios from 'axios'
+import { DataGrid, GridColDef } from '@mui/x-data-grid'
 
-export default function Home() {
+// TODO: refactor
+const options = ['BRCA1', 'TP53', 'EGFR', 'KRAS', 'ALK', 'PTEN', 'FLT3', 'MYC', 'MAP2K1', 'NOTCH1']
+const columns: GridColDef[] = [
+    { field: 'name', headerName: 'Name', width: 230 },
+    { field: 'email', headerName: 'E-mail', width: 230 },
+    { field: 'body', headerName: 'Body', flex: 1 },
+]
+
+const Home = () => {
+    const searchParams = useSearchParams()
+    const pathname = usePathname()
+    const { replace } = useRouter()
+    const [query, setQuery] = useState<string | null>(searchParams.get('query'))
+    // TODO: add error handling
+    const { data, isFetching } = useQuery({
+        queryKey: ['fetchComments', searchParams.get('query')],
+        queryFn: async (queryArgs) => {
+            const response = await axios.get(
+                // TODO: move url to env
+                `https://jsonplaceholder.typicode.com/comments?${queryArgs.queryKey[1] ? `postId=${queryArgs.queryKey[1]}` : ''}`,
+            )
+            return response.data
+        },
+    })
+
+    const handleSearch = useCallback(() => {
+        const params = new URLSearchParams(searchParams)
+        if (!!query) {
+            params.set('query', query)
+        } else {
+            params.delete('query')
+        }
+        replace(`${pathname}?${params.toString()}`)
+    }, [pathname, query, replace, searchParams])
+
     return (
-        <main className={styles.main}>
-            <div className={styles.description}>
-                <p>
-                    Get started by editing&nbsp;
-                    <code className={styles.code}>src/app/page.tsx</code>
-                </p>
-                <div>
-                    <a
-                        href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        By <Image src="/vercel.svg" alt="Vercel Logo" className={styles.vercelLogo} width={100} height={24} priority />
-                    </a>
-                </div>
-            </div>
-
-            <div className={styles.center}>
-                <Image className={styles.logo} src="/next.svg" alt="Next.js Logo" width={180} height={37} priority />
-            </div>
-
-            <div className={styles.grid}>
-                <a
-                    href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-                    className={styles.card}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <h2>
-                        Docs <span>-&gt;</span>
-                    </h2>
-                    <p>Find in-depth information about Next.js features and API.</p>
-                </a>
-
-                <a
-                    href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-                    className={styles.card}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <h2>
-                        Learn <span>-&gt;</span>
-                    </h2>
-                    <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-                </a>
-
-                <a
-                    href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-                    className={styles.card}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <h2>
-                        Templates <span>-&gt;</span>
-                    </h2>
-                    <p>Explore starter templates for Next.js.</p>
-                </a>
-
-                <a
-                    href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-                    className={styles.card}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <h2>
-                        Deploy <span>-&gt;</span>
-                    </h2>
-                    <p>Instantly deploy your Next.js site to a shareable URL with Vercel.</p>
-                </a>
-            </div>
-        </main>
+        // TODO: responsivity
+        <Container sx={{ paddingBlock: 10 }}>
+            <Box sx={{ width: '100%', display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, marginBottom: 4 }}>
+                <Autocomplete
+                    freeSolo
+                    id={'search-input'}
+                    disableClearable
+                    options={options}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            label={'Search'}
+                            value={query}
+                            onChange={(event) => {
+                                setQuery(event.target.value)
+                            }}
+                            InputProps={{
+                                ...params.InputProps,
+                                type: 'search',
+                            }}
+                        />
+                    )}
+                    value={query ? query : undefined}
+                    onChange={(event, value) => {
+                        setQuery(value)
+                    }}
+                    sx={{ width: 300 }}
+                    size={'small'}
+                />
+                <Button variant={'contained'} startIcon={<SearchRoundedIcon />} onClick={handleSearch}>
+                    {'Search'}
+                </Button>
+            </Box>
+            <DataGrid loading={isFetching} rows={data || []} columns={columns} autoHeight />
+        </Container>
     )
 }
+
+export default Home
