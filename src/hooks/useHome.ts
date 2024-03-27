@@ -1,5 +1,5 @@
 import { GridColDef } from '@mui/x-data-grid'
-import { useQuery } from '@tanstack/react-query'
+import { QueryFunction, QueryOptions, useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
@@ -26,12 +26,7 @@ const useHome = (): UseHomeResult => {
     })
     const { data: rows, isFetching: isRowsFetching } = useQuery({
         queryKey: ['fetchComments', searchParams.get('query')],
-        queryFn: async (queryArgs) => {
-            const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/comments?${queryArgs.queryKey[1] ? `postId=${queryArgs.queryKey[1]}` : ''}`,
-            )
-            return response.data
-        },
+        queryFn: fetchComments<JsonPlaceholderComment>,
         throwOnError: true,
     })
 
@@ -59,6 +54,21 @@ const useHome = (): UseHomeResult => {
         isLoading,
         handleSearch,
     }
+}
+
+const fetchComments = async <T>(queryArgs: {
+    queryKey: (string | null)[]
+    signal: AbortSignal
+    meta: Record<string, unknown> | undefined
+}): Promise<T[]> => {
+    const searchKeyword = queryArgs.queryKey[1]
+    const url = new URL('/comments', process.env.NEXT_PUBLIC_API_URL)
+    if (searchKeyword) {
+        const urlSearchParams = url.searchParams
+        urlSearchParams.set('postId', searchKeyword)
+    }
+    const response = await axios.get<T[]>(url.toString())
+    return response.data
 }
 
 const mockedOptions = ['BRCA1', 'TP53', 'EGFR', 'KRAS', 'ALK', 'PTEN', 'FLT3', 'MYC', 'MAP2K1', 'NOTCH1'] // Provided in task description
