@@ -1,36 +1,30 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Short description of app
+
+This is a simple app that allows you to search for a comments from [https://jsonplaceholder.typicode.com](https://jsonplaceholder.typicode.com). You can search for the comments using searchbar where you canfill the `postId` (1-100). If you fill the search input with the number in range 1-100, the app will search for the comments of `postId` you provided.
+
+The search input is also `Autocomplete` input, so you can select the `postId` from the dropdown list as you write. In the dropdown list you can see the provided options. None of them will search for some comments. They are just for demonstration purposes.
+
+You can also sort the comments by name, email, body. The comments are paginated and you can navigate through the pages.
+
+Remember that this app is only for demonstration purposes and is not intended for production use.
+
+## Technologies used
+Material-UI, Next.js, React, TypeScript, Axios, ESLint, Prettier, Tanstack/react-query, JSONPlaceholder API.
 
 ## Getting Started
 
-First, run the development server:
+First create a `.env.local` file in the root of the project and copy the contents of the `.env.example` file into it. Or you can just rename the `.env.example` file to `.env.local`.
+
+Then, install the dependencies:
+
+```bash
+npm install
+```
+
+Then run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
--   [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
--   [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
